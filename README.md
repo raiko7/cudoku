@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/raiko7/cudoku.svg?branch=master)](https://travis-ci.org/raiko7/cudoku.svg?branch=master)
+
 # Overview
 *cudoku* is a simple Sudoku solver based on backtracking search. It is written in plain ANSI C and does not use explicit recursion, so it is blazingly fast (despite the brute-force strategy). Originally *cudoku* was a coding kata idea, created while spending about an hour in a doctor's waiting room.
 
