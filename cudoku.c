@@ -101,30 +101,30 @@ static bool GetFreePos(int *pRow, int *pCol) {
 
    static bool sFirst = true;
 
-	if (sFirst) {
-		sFirst = false;
-		*pRow = 0;
-		*pCol = 0;
-		if (!sPreset[*pRow][*pCol]) return true;
-	}
+   if (sFirst) {
+      sFirst = false;
+      *pRow = 0;
+      *pCol = 0;
+      if (!sPreset[*pRow][*pCol]) return true;
+   }
 
-	do {
-		++*pCol;
-		if (*pCol == cNumCnt) {
-			*pCol = 0;
-			++*pRow;
-			assert(*pRow != cNumCnt);
-		}
-	} while (sPreset[*pRow][*pCol]);
+   do {
+      ++*pCol;
+      if (*pCol == cNumCnt) {
+         *pCol = 0;
+         ++*pRow;
+         assert(*pRow != cNumCnt);
+      }
+   } while (sPreset[*pRow][*pCol]);
 
-	return true;
+   return true;
 }
 
 /******************************************************************************/
 static void ExitUnsolved(void) {
 
-	puts("puzzle cannot be solved !");
-	exit(EXIT_FAILURE);
+   puts("puzzle cannot be solved !");
+   exit(EXIT_FAILURE);
 }
 
 /*------------------------------------------------------------------------------
@@ -134,9 +134,9 @@ int main(int argc, char *argv[]) {
 
    FILE    *pFile;
    int      i, j, v, row, col, sqr, altCnt, backtrackCnt = 0;
-	BSet     alts;
-	bool     ok;
-	History *p;
+   BSet     alts;
+   bool     ok;
+   History *p;
 
    if (argc < 2) {
       printf("Usage: %s <matrix file>\n", argv[0]);
@@ -167,13 +167,13 @@ int main(int argc, char *argv[]) {
          &sMatrix[i][7],
          &sMatrix[i][8]);
 
-		sRows[i] = sCols[i] = sSqrs[i] = (1 << cMaxNum) - 1;   /* start with ALL numbers */
+      sRows[i] = sCols[i] = sSqrs[i] = (1 << cMaxNum) - 1;   /* start with ALL numbers */
       for (j=0; j<cMaxNum; ++j) {
          if (sMatrix[i][j] != 0) {
-				sPreset[i][j] = true;
-				BSetRemove(sRows[i], sMatrix[i][j] - 1);
-				++sPresetCnt;
-			}
+            sPreset[i][j] = true;
+            BSetRemove(sRows[i], sMatrix[i][j] - 1);
+            ++sPresetCnt;
+         }
       }
    }
 
@@ -181,67 +181,67 @@ int main(int argc, char *argv[]) {
 
    for (j=0; j<cMaxNum; ++j) {
       for (i=0; i<cMaxNum; ++i) {
-			v = sMatrix[i][j];
+         v = sMatrix[i][j];
          if (v != 0) {
-				BSetRemove(sCols[j], v - 1);
-				BSetRemove(sSqrs[csPos2Sqr[i][j]], v - 1);
-			}
+            BSetRemove(sCols[j], v - 1);
+            BSetRemove(sSqrs[csPos2Sqr[i][j]], v - 1);
+         }
       }
    }
 
    /*---------------------------------------------------------------------------
    *  compute matrix elements
    */
-	sTotalCnt = cNumCnt * cNumCnt - sPresetCnt;
-	sCnt = 0;
+   sTotalCnt = cNumCnt * cNumCnt - sPresetCnt;
+   sCnt = 0;
 
-	while (sCnt != sTotalCnt) {
+   while (sCnt != sTotalCnt) {
 
-		if (!GetFreePos(&row, &col)) ExitUnsolved();
-		sqr = csPos2Sqr[row][col];
+      if (!GetFreePos(&row, &col)) ExitUnsolved();
+      sqr = csPos2Sqr[row][col];
 
-		alts = sRows[row] & sCols[col] & sSqrs[sqr];
-		altCnt = BSetGetLength(alts);
-		i = 0;
-		ok = !BSetIsEmpty(alts);
+      alts = sRows[row] & sCols[col] & sSqrs[sqr];
+      altCnt = BSetGetLength(alts);
+      i = 0;
+      ok = !BSetIsEmpty(alts);
 
-		while (!ok) {
-			if (sCnt == 0) ExitUnsolved();
-			++backtrackCnt;
+      while (!ok) {
+         if (sCnt == 0) ExitUnsolved();
+         ++backtrackCnt;
 
-			--sCnt;
-			p = &sHistory[sCnt];
-			row = p->mRow;
-			col = p->mCol;
-			sqr = csPos2Sqr[row][col];
+         --sCnt;
+         p = &sHistory[sCnt];
+         row = p->mRow;
+         col = p->mCol;
+         sqr = csPos2Sqr[row][col];
 
-			v = sMatrix[row][col] - 1;
-			sMatrix[row][col] = 0;
-			BSetAdd(sRows[row], v);
-			BSetAdd(sCols[col], v);
-			BSetAdd(sSqrs[sqr], v);
+         v = sMatrix[row][col] - 1;
+         sMatrix[row][col] = 0;
+         BSetAdd(sRows[row], v);
+         BSetAdd(sCols[col], v);
+         BSetAdd(sSqrs[sqr], v);
 
-			alts   = p->mAlts;
-			altCnt = p->mAltCnt;
-			i      = p->mAltIdx;
-			++i;
-			ok = i < p->mAltCnt;
-		}
+         alts   = p->mAlts;
+         altCnt = p->mAltCnt;
+         i      = p->mAltIdx;
+         ++i;
+         ok = i < p->mAltCnt;
+      }
 
-		v = BSetGetNth(alts, i);
-		sMatrix[row][col] = v + 1;
-		BSetRemove(sRows[row], v);
-		BSetRemove(sCols[col], v);
-		BSetRemove(sSqrs[sqr], v);
+      v = BSetGetNth(alts, i);
+      sMatrix[row][col] = v + 1;
+      BSetRemove(sRows[row], v);
+      BSetRemove(sCols[col], v);
+      BSetRemove(sSqrs[sqr], v);
 
-		p = &sHistory[sCnt];
-		p->mRow    = row;
-		p->mCol    = col;
-		p->mAlts   = alts;
-		p->mAltCnt = altCnt;
-		p->mAltIdx = i;
-		++sCnt;
-	}
+      p = &sHistory[sCnt];
+      p->mRow    = row;
+      p->mCol    = col;
+      p->mAlts   = alts;
+      p->mAltCnt = altCnt;
+      p->mAltIdx = i;
+      ++sCnt;
+   }
 
    /*---------------------------------------------------------------------------
    *  print complete matrix
